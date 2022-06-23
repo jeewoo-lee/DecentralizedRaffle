@@ -24,6 +24,6 @@ contract RaffleFactory {
             revert RaffleFactory__NotOwner();
         }
         // Raffle theRaffle = new Raffle(_minInput, _itemPrice, raffleId, msg.sender);
-        raffles[address(theRaffle)] = _itemName;
+        // raffles[address(theRaffle)] = _itemName;
     }
 }

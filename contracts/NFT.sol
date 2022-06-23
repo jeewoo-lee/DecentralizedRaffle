@@ -7,26 +7,86 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "base64-sol/base64.sol";
 import "hardhat/console.sol";
 
-struct RaffleData {
+struct TokenData {
     uint256 lowVal;
     uint256 highVal;
     uint256 amountDeposited;
-    uint256 squaredDposited;
     uint256 raffleId;
-    address raffleAddress;
 }
 
+error NFT__InvalidRaffleAddress();
+error NFT__InvalidTokenId();
+
 contract NFT is ERC721, Ownable {
-    uint256 private s_last_val;
     uint256 private i_mintFee; //will move to raffle contract
-    mapping(uint256 => uint256) private s_raffleToLastVals; // raffleId => lastVal
-    mapping(uint256 => RaffleData) private s_idToRaffleData;
+    mapping(uint256 => TokenData) private s_tokenIdToTokenData; // tokenId => TokenData instance
+    mapping(uint256 => uint256) private s_raffleIdToLastVal; // raffleId =>  Last highVal of the raffle
+    mapping(address => uint256) private s_raffleAddresses;
+
     // address[] public s_nfts;
     uint256 public s_tokenId;
 
+    /* Events */
+    event NFT__MINTED();
+
     constructor() ERC721("Raffle Ticket", "RNFT") {
-        s_tokenId = 0;
+        s_tokenId = 1;
     }
 
-    // make funcion that creates "new keys" for s_raffleToLastVals, s_idToRaffleData
+    // make funcion that creates a "new key" for s_raffleIdToRaffleData
+    // this is called by Raffle contract when a new raffle is initiated
+    function createRaffleTicket(uint256 _raffleId, address _raffleAddress) public {
+        s_raffleIdToLastVal[_raffleId] = 0;
+        s_raffleAddresses[_raffleAddress] = 1;
+    }
+
+    /*
+     * Mints NFT and send it to the user. It adds tokenId to s_tokenIdToTokenData with newly created TokenData instance.
+     * This function should be only callable thorugh deployed raffle contracts.
+     */
+    function mint(
+        uint256 _raffleId,
+        address _userAddress,
+        uint256 _squareDeposited,
+        uint256 _amountDeposited
+    ) public {
+        if (s_raffleAddresses[msg.sender] == 0) {
+            revert NFT__InvalidRaffleAddress();
+        }
+        s_tokenIdToTokenData[_raffleId] = TokenData(
+            s_raffleIdToLastVal[_raffleId],
+            _squareDeposited,
+            _amountDeposited,
+            _raffleId
+        );
+        _mint(_userAddress, s_tokenId);
+        s_tokenId++;
+        emit NFT__MINTED();
+    }
+
+    /*
+     * getTokenDataOf returns TokenData of given tokenId.
+     */
+    function getTokenDataOf(uint256 _tokenId) public view returns (TokenData memory tokenData) {
+        if (_tokenId < 1 || _tokenId >= s_tokenId) {
+            revert NFT__InvalidTokenId();
+        }
+        tokenData = s_tokenIdToTokenData[_tokenId];
+    }
+
+    /*
+     * getLastValOf returns the last highVal of given raffleId.
+     * This function will be used to calculate chances of winning and choosing the random word.
+     */
+    function getLastValOf(uint256 _raffleId) public view returns (uint256 lastVal) {
+        lastVal = s_raffleIdToLastVal[_raffleId];
+    }
+
+    /*
+     * getAmountDepositedOf returns the amountDeposited in exchange of given tokenId.
+     * This function will be used in displaying information of the NFT.
+     */
+    function getAmountDepostiedOf(uint256 _tokenId) public view returns (uint256 amountDeposited) {
+        amountDeposited = s_tokenIdToTokenData[_tokenId].amountDeposited;
+    }
 }
