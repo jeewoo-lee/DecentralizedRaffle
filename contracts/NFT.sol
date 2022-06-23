@@ -53,9 +53,10 @@ contract NFT is ERC721, Ownable {
         if (s_raffleAddresses[msg.sender] == 0) {
             revert NFT__InvalidRaffleAddress();
         }
-        s_tokenIdToTokenData[_raffleId] = TokenData(
-            s_raffleIdToLastVal[_raffleId],
-            _squareDeposited,
+        uint256 lowVal = s_raffleIdToLastVal[_raffleId];
+        s_tokenIdToTokenData[s_tokenId] = TokenData(
+            lowVal,
+            (_squareDeposited + lowVal),
             _amountDeposited,
             _raffleId
         );
@@ -89,4 +90,5 @@ contract NFT is ERC721, Ownable {
     function getAmountDepostiedOf(uint256 _tokenId) public view returns (uint256 amountDeposited) {
         amountDeposited = s_tokenIdToTokenData[_tokenId].amountDeposited;
     }
+
 }

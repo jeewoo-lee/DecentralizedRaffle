@@ -4,6 +4,7 @@ pragma solidity ^0.8.7;
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
+import "./NFT.sol";
 
 struct RaffleState {
     bool isOpen;
@@ -73,7 +74,6 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
      * function checkUpkeep, performupKeepm and fulfillRandomWords are utilzied to keep track of when to close the raffle and
      * choose the random winner.
      */
-
     function checkUpkeep(
         bytes memory /*checkData*/
     )
@@ -182,6 +182,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
      */
     function checkWin() public view returns (bool) {
         // under construction
+        // NFT.ownerOf?
     }
 
     /* utils */
