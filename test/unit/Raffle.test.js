@@ -4,4 +4,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
 
 !developmentChains.includes(network.name)
     ? describe.skip
-    : describe("Raffle Unit Tests", function () {})
+    : describe("Raffle Unit Tests", function () {
+          let raffle, raffleContract, vrfCoordinatorV2Mock, raffleEntranceFee, interval, player
+          
+      })
