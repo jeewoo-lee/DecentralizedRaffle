@@ -11,9 +11,10 @@ struct RaffleState {
     uint256 raffleId;
 }
 
-error Raffle__NotEnoughEth();
+error Raffle__NotEnoughMoney();
 error Raffle__TransferFailed();
 error Raffle__NotOpen();
+error Raffle__CannotWithdraw(string m);
 error Raffle__UpkeepNotNeeded(uint256 currentBalance, bool raffleState);
 
 contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
@@ -30,12 +31,10 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     uint256 private s_time;
     uint256 public s_total_deposited = 0;
     uint256 public s_squared_total = 0;
-    uint256 private s_total_depositers = 0;
     uint256 private immutable i_item_price;
-    uint256 private s_last_nft_val;
-    address private s_winner;
-    address private s_owner;
     uint256 private s_lastTimeStamp;
+    uint256 private s_winNum;
+    address private s_owner; // might be removed later.
     mapping(address => uint256) private deposits;
     RaffleState private s_raffleState;
 
@@ -44,6 +43,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     event RaffleEnter(address indexed player, uint256 amount);
     event WinnerPicked(address indexed player);
     event WinnerAlerted(address indexed player);
+    event Withdrawed(address indexed player);
     event LoserAlerted(address indexed player);
 
     constructor(
@@ -68,6 +68,11 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     }
 
     function example() public {}
+
+    /*
+     * function checkUpkeep, performupKeepm and fulfillRandomWords are utilzied to keep track of when to close the raffle and
+     * choose the random winner.
+     */
 
     function checkUpkeep(
         bytes memory /*checkData*/
@@ -110,13 +115,88 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         uint256, /*requestId*/
         uint256[] memory randomWords
     ) internal override {
-        uint256 indexOfWinner = randomWords[0] % 100; //100 should be lastval from NFT
-
+        s_winNum = randomWords[0] % 100; //100 should be lastval from NFT.sol
         // s_lastTimeStamp = block.timestamp;
         // (bool success, ) = recentWinner.call{value: address(this).balance}("");
         // if (!success) {
         //     revert Raffle__TransferFailed();
         // }
         // emit WinnerPicked(recentWinner);
+    }
+
+    /*
+     * enterRaffle allows users to put money and get a raffle ticket (NFT).
+     */
+    function enterRaffle(uint256 amount) public payable {
+        if (msg.value - amount > i_minInputMoney) {
+            revert Raffle__NotEnoughMoney();
+        }
+        if (s_raffleState.isOpen == false) {
+            revert Raffle__NotOpen();
+        }
+
+        s_total_deposited += amount;
+        s_squared_total += sqrt(amount);
+        deposits[msg.sender] += amount;
+
+        // call NFT.sol's minting function here
+    }
+
+    /*
+     * withdraw allows users to withdraw amount they have deposited when the raffle deposit goal hasn’t met in time.
+     */
+    function withrdaw() public {
+        if (s_raffleState.isOpen == false && s_total_deposited < i_item_price) {
+            revert Raffle__CannotWithdraw("Raffle is not closed!");
+        }
+        if (deposits[msg.sender] < 0) {
+            revert Raffle__CannotWithdraw("Doesn't have matic to withdraw");
+        }
+
+        s_total_deposited -= deposits[msg.sender];
+        (bool success, ) = msg.sender.call{value: address(this).balance}("");
+
+        if (!success) {
+            revert Raffle__TransferFailed();
+        }
+        deposits[msg.sender] = 0;
+        emit Withdrawed(msg.sender);
+    }
+
+    /*
+     * potentialChances calculate potential chances for user to win the raffle
+     */
+    function potentialChances(uint256 amount) public view returns (uint256 chance) {
+        chance = (sqrt(amount)) / (s_squared_total + sqrt(amount));
+    }
+
+    /*
+     * tokenChances calculate actual chances for the token to win the raffle
+     */
+    function tokenChances(uint256 tokenId) public view returns (uint256 chance) {
+        // get tokenData from NFT contract
+    }
+
+    /*
+     * checkWin allow people to confirm if they won with NFT they hold.
+     */
+    function checkWin() public view returns (bool) {
+        // under construction
+    }
+
+    /* utils */
+    // babylonian method (https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method)
+    // from https://github.com/Uniswap/v2-core/blob/4dd59067c76dea4a0e8e4bfdda41877a6b16dedc/contracts/libraries/Math.sol#L11-L22
+    function sqrt(uint256 y) internal pure returns (uint256 z) {
+        if (y > 3) {
+            z = y;
+            uint256 x = y / 2 + 1;
+            while (x < z) {
+                z = x;
+                x = (y / x + x) / 2;
+            }
+        } else if (y != 0) {
+            z = 1;
+        }
     }
 }
