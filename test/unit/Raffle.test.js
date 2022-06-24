@@ -1,5 +1,5 @@
 const { assert, expect } = require("chai")
-const {network, deployments, ethers } = require("hardhat")
+const { network, deployments, ethers } = require("hardhat")
 const { developmentChains, networkConfig } = require("../../helper-hardhat-config")
 
 const ITEM_PRICE = ethers.utils.parseEther("1")
@@ -18,6 +18,13 @@ const INTERVAL = 120
               raffleFactory = raffleFactoryContract.connect(deployer)
               raffleMinInput = await raffleFactory.minInput()
               console.log("Deployer: ", deployer.address.toString())
+
+              /**
+               * create raffle contract for testing purposes later on.
+               */
+              await raffleFactory.createRaffle(ITEM_PRICE, INTERVAL)
+              const theAddress = await raffleFactory.raffles(0)
+              const raffleContract = await ethers.getContractAt("Raffle", theAddress)
           })
 
           describe("constructor", function () {
@@ -28,10 +35,10 @@ const INTERVAL = 120
                       raffleMinInput.toString()
                   )
               })
-              it("creates nft contract", async() => {
-                const nftAddress = await raffleFactory.nftAddress()
-                console.log("NFT:", nftAddress.toString());
-                expect(nftAddress).to.not.equal(0)
+              it("creates nft contract", async () => {
+                  const nftAddress = await raffleFactory.nftAddress()
+                  console.log("NFT:", nftAddress.toString())
+                  expect(nftAddress).to.not.equal(0)
               })
           })
 
@@ -39,11 +46,11 @@ const INTERVAL = 120
               it("correctly deploys raffle contract", async () => {
                   console.log((await raffleFactory.owner()).toString())
                   await raffleFactory.createRaffle(ITEM_PRICE, INTERVAL)
-                  const theAddress = await raffleFactory.raffles(0)
+                  const theAddress = await raffleFactory.raffles(1)
                   console.log(theAddress.toString())
-                  expect(theAddress).to.not.equal(0);
+                  expect(theAddress).to.not.equal(0)
                   const raffleContract = await ethers.getContractAt("Raffle", theAddress)
-                  assert(await (raffleContract.i_minInputMoney()), raffleMinInput)
+                  assert(await raffleContract.i_minInputMoney(), raffleMinInput)
               })
           })
       })
