@@ -20,7 +20,7 @@ contract RaffleFactory {
     mapping(uint256 => address) public raffles; //the contract address to name of the raffle
     uint256 public raffleId = 0;
     uint256 public immutable minInput;
-    address private immutable owner;
+    address public immutable owner;
     address public immutable nftAddress;
     address private immutable vrfAddress;
 
