@@ -37,7 +37,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     uint256 private s_winNum;
     address private immutable s_owner; // might be removed later.
     mapping(address => uint256) private deposits;
-    RaffleState private s_raffleState;
+    RaffleState public s_raffleState;
 
     /* events */
     event RequestedRaffleWinner(uint256 indexed requestId);
@@ -71,8 +71,6 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         s_owner = _owner;
 
     }
-
-    function example() public {}
 
     /*
      * function checkUpkeep, performupKeepm and fulfillRandomWords are utilzied to keep track of when to close the raffle and
