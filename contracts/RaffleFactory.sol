@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 import "./Raffle.sol";
+import "./NFT.sol";
 
 error RaffleFactory__NotOwner();
 error RaffleFactory__AlreadyCreated();
@@ -16,24 +17,47 @@ error RaffleFactory__AlreadyCreated();
 // uint32 _callbackGasLimit
 
 contract RaffleFactory {
-    mapping(address => string) public raffles; //the contract address to name of the raffle
+    mapping(uint256 => address) public raffles; //the contract address to name of the raffle
     uint256 public raffleId = 0;
     uint256 public immutable minInput;
     address private immutable owner;
+    address public immutable nftAddress;
+    address private immutable vrfAddress;
 
-    constructor(uint256 _minInput) {
+    bytes32 private immutable gasLane;
+    uint64 private immutable subscriptionID;
+    uint32 private immutable callbackGasLimit;
+
+    constructor(
+        uint256 _minInput,
+        address _vrfAddress,
+        bytes32 _gasLane,
+        uint64 _subscriptionID,
+        uint32 _callbackGasLimit
+    ) {
         owner = msg.sender; // Whoever deploys smart contract becomes the owner
         minInput = _minInput;
+        nftAddress = createNFT();
+        vrfAddress = _vrfAddress;
+        gasLane = _gasLane;
+        subscriptionID = _subscriptionID;
+        callbackGasLimit = _callbackGasLimit;
     }
 
     function createRaffle(
-        string memory _itemName,
-        uint256 _itemPrice
+        uint256 _itemPrice,
+        uint32 _interval
     ) external {
         if (msg.sender != owner) {
             revert RaffleFactory__NotOwner();
         }
-        // Raffle theRaffle = new Raffle(_minInput, _itemPrice, raffleId, msg.sender);
-        // raffles[address(theRaffle)] = _itemName;
+        Raffle theRaffle = new Raffle(vrfAddress, minInput, _itemPrice, raffleId, _interval, gasLane, subscriptionID, callbackGasLimit);
+        raffles[raffleId] = address(theRaffle);
+        raffleId++;
+    }
+
+    function createNFT() internal returns (address) {
+        NFT theNFT = new NFT();
+        return address(theNFT);
     }
 }

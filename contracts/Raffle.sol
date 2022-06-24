@@ -53,7 +53,6 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         uint256 _itemPrice,
         uint256 _raffleID,
         uint32 _endTime,
-        address _owner,
         bytes32 _gasLane,
         uint64 _subscriptionID,
         uint32 _callbackGasLimit
@@ -65,7 +64,6 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         i_callbackGasLimit = _callbackGasLimit;
         s_raffleState = RaffleState(true, _endTime, _raffleID);
         i_item_price = _itemPrice;
-        s_owner = _owner;
     }
 
     function example() public {}
