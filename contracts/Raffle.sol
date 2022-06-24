@@ -29,12 +29,11 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     uint32 private constant NUM_WORDS = 1; //for requesting random word from chainlinkvrf
 
     /* raffle */
-    uint256 private immutable i_minInputMoney;
+    uint256 public immutable i_minInputMoney;
     uint256 private s_time;
     uint256 public s_total_deposited = 0;
     uint256 public s_squared_total = 0;
-    uint256 private immutable i_item_price;
-    uint256 private s_lastTimeStamp;
+    uint256 public immutable i_item_price;
     uint256 private s_winNum;
     address private immutable s_owner; // might be removed later.
     mapping(address => uint256) private deposits;

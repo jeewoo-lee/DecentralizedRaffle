@@ -44,7 +44,7 @@ contract RaffleFactory {
         callbackGasLimit = _callbackGasLimit;
     }
 
-    function createRaffle(uint256 _itemPrice, uint32 _interval) external {
+    function createRaffle(uint256 _itemPrice, uint32 _interval) public {
         if (msg.sender != owner) {
             revert RaffleFactory__NotOwner();
         }
