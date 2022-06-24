@@ -28,6 +28,11 @@ const INTERVAL = 120
                       raffleMinInput.toString()
                   )
               })
+              it("creates nft contract", async() => {
+                const nftAddress = await raffleFactory.nftAddress()
+                console.log("NFT:", nftAddress.toString());
+                expect(nftAddress).to.not.equal(0)
+              })
           })
 
           describe("createRaffle", function () {
