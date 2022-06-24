@@ -1,5 +1,5 @@
 const { assert, expect } = require("chai")
-const { network, deployments, ethers } = require("hardhat")
+const {network, deployments, ethers } = require("hardhat")
 const { developmentChains, networkConfig } = require("../../helper-hardhat-config")
 
 const ITEM_PRICE = ethers.utils.parseEther("1")
@@ -17,7 +17,7 @@ const INTERVAL = 120
               raffleFactoryContract = await ethers.getContract("RaffleFactory")
               raffleFactory = raffleFactoryContract.connect(deployer)
               raffleMinInput = await raffleFactory.minInput()
-              console.log("Deployer: ", deployer.address.toString());
+              console.log("Deployer: ", deployer.address.toString())
           })
 
           describe("constructor", function () {
@@ -34,10 +34,11 @@ const INTERVAL = 120
               it("correctly deploys raffle contract", async () => {
                   console.log((await raffleFactory.owner()).toString())
                   await raffleFactory.createRaffle(ITEM_PRICE, INTERVAL)
-                  const theAddress = (await raffleFactory.raffles(0))
+                  const theAddress = await raffleFactory.raffles(0)
                   console.log(theAddress.toString())
-                  const raffleContract = await ethers.getContractAt(theAddress)
-                  assert(raffleContract.i_minInputMoney(), raffleMinInput)
+                  expect(theAddress).to.not.equal(0);
+                  const raffleContract = await ethers.getContractAt("Raffle", theAddress)
+                  assert(await (raffleContract.i_minInputMoney()), raffleMinInput)
               })
           })
       })
