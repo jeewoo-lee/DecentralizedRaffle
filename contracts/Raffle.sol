@@ -8,7 +8,7 @@ import "./NFT.sol";
 
 struct RaffleState {
     bool isOpen;
-    uint32 endTime;
+    uint32 interval;
     uint256 raffleId;
 }
 
@@ -21,6 +21,7 @@ error Raffle__UpkeepNotNeeded(uint256 currentBalance, bool raffleState);
 contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     /* chainlink */
     VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
+    NFT private immutable i_nft;
     uint64 private immutable i_subscriptionId;
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
@@ -35,7 +36,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     uint256 private immutable i_item_price;
     uint256 private s_lastTimeStamp;
     uint256 private s_winNum;
-    address private s_owner; // might be removed later.
+    address private immutable s_owner; // might be removed later.
     mapping(address => uint256) private deposits;
     RaffleState private s_raffleState;
 
@@ -49,21 +50,27 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     constructor(
         address vrfCoordinatorV2,
+        address nft,
+        address _owner,
         uint256 _minInput,
         uint256 _itemPrice,
         uint256 _raffleID,
-        uint32 _endTime,
+        uint32 _interval,
         bytes32 _gasLane,
         uint64 _subscriptionID,
         uint32 _callbackGasLimit
     ) VRFConsumerBaseV2(vrfCoordinatorV2) {
+        i_nft = NFT(nft);
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
         i_minInputMoney = _minInput;
         i_gasLane = _gasLane;
         i_subscriptionId = _subscriptionID;
         i_callbackGasLimit = _callbackGasLimit;
-        s_raffleState = RaffleState(true, _endTime, _raffleID);
+        s_raffleState = RaffleState(true, _interval, _raffleID);
         i_item_price = _itemPrice;
+        s_time = block.timestamp;
+        s_owner = _owner;
+
     }
 
     function example() public {}
@@ -83,7 +90,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         )
     {
         bool isOpen = true == s_raffleState.isOpen;
-        bool timePassed = (block.timestamp > (s_raffleState.endTime));
+        bool timePassed = (block.timestamp > (s_raffleState.interval + s_time));
         bool hasBalance = address(this).balance > 0;
         upkeepNeeded = (isOpen && timePassed && hasBalance);
     }
@@ -113,7 +120,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         uint256, /*requestId*/
         uint256[] memory randomWords
     ) internal override {
-        s_winNum = randomWords[0] % 100; //100 should be lastval from NFT.sol
+        s_winNum = randomWords[0] % i_nft.getLastValOf(s_raffleState.raffleId); //100 should be lastval from NFT.sol
         // s_lastTimeStamp = block.timestamp;
         // (bool success, ) = recentWinner.call{value: address(this).balance}("");
         // if (!success) {

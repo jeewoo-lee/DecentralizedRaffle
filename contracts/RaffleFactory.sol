@@ -44,14 +44,24 @@ contract RaffleFactory {
         callbackGasLimit = _callbackGasLimit;
     }
 
-    function createRaffle(
-        uint256 _itemPrice,
-        uint32 _interval
-    ) external {
+    function createRaffle(uint256 _itemPrice, uint32 _interval) external {
         if (msg.sender != owner) {
             revert RaffleFactory__NotOwner();
         }
-        Raffle theRaffle = new Raffle(vrfAddress, minInput, _itemPrice, raffleId, _interval, gasLane, subscriptionID, callbackGasLimit);
+
+        Raffle theRaffle = new Raffle(
+            nftAddress,
+            vrfAddress,
+            owner,
+            minInput,
+            _itemPrice,
+            raffleId,
+            _interval,
+            gasLane,
+            subscriptionID,
+            callbackGasLimit
+        );
+
         raffles[raffleId] = address(theRaffle);
         raffleId++;
     }
