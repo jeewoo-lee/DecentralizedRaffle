@@ -10,6 +10,7 @@ import "hardhat/console.sol";
 struct TokenData {
     uint256 lowVal;
     uint256 highVal;
+    uint256 sqAmount;
     uint256 amountDeposited;
     uint256 raffleId;
 }
@@ -57,6 +58,7 @@ contract NFT is ERC721, Ownable {
         s_tokenIdToTokenData[s_tokenId] = TokenData(
             lowVal,
             (_squareDeposited + lowVal),
+            _squareDeposited,
             _amountDeposited,
             _raffleId
         );

@@ -12,6 +12,7 @@ struct RaffleState {
     uint256 raffleId;
 }
 
+error Raffle__NotDone();
 error Raffle__NotEnoughMoney();
 error Raffle__TransferFailed();
 error Raffle__NotOpen();
@@ -29,6 +30,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     uint32 private constant NUM_WORDS = 1; //for requesting random word from chainlinkvrf
 
     /* raffle */
+    bool public s_canUserWithdraw;
     uint256 public immutable i_minInputMoney;
     uint256 private s_time;
     uint256 public s_total_deposited = 0;
@@ -69,7 +71,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         i_item_price = _itemPrice;
         s_time = block.timestamp;
         s_owner = _owner;
-
+        i_nft.createRaffleTicket(_raffleID, address(this));
     }
 
     /*
@@ -102,6 +104,13 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         if (!upkeepNeeded) {
             revert Raffle__UpkeepNotNeeded(address(this).balance, s_raffleState.isOpen);
         }
+
+        if (s_total_deposited < i_item_price) {
+            s_canUserWithdraw = true;
+            s_raffleState.isOpen = false;
+            return;
+        }
+
         s_raffleState.isOpen = false;
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
@@ -130,6 +139,8 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
      * enterRaffle allows users to put money and get a raffle ticket (NFT).
      */
     function enterRaffle(uint256 amount) public payable {
+        // amount: amount to fund
+        // msg.value: amount + fee
         if (msg.value - amount > i_minInputMoney) {
             revert Raffle__NotEnoughMoney();
         }
@@ -142,19 +153,20 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         deposits[msg.sender] += amount;
 
         // call NFT.sol's minting function here
+        i_nft.mint(s_raffleState.raffleId, msg.sender, sqrt(amount), amount);
     }
 
     /*
      * withdraw allows users to withdraw amount they have deposited when the raffle deposit goal hasn’t met in time.
      */
     function withrdaw() public {
-        if (s_raffleState.isOpen == false && s_total_deposited < i_item_price) {
-            revert Raffle__CannotWithdraw("Raffle is not closed!");
+        if (!s_canUserWithdraw) {
+            revert Raffle__CannotWithdraw("No one can withdraw yet!");
         }
-        if (deposits[msg.sender] < 0) {
-            revert Raffle__CannotWithdraw("Doesn't have matic to withdraw");
+        if (deposits[msg.sender] <= 0) {
+            revert Raffle__CannotWithdraw("Doesn't have matic to withdraw!");
         }
-
+        
         s_total_deposited -= deposits[msg.sender];
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
 
@@ -177,14 +189,20 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
      */
     function tokenChances(uint256 tokenId) public view returns (uint256 chance) {
         // get tokenData from NFT contract
+        chance = i_nft.getTokenDataOf(tokenId).sqAmount / s_squared_total;
     }
 
     /*
      * checkWin allow people to confirm if they won with NFT they hold.
      */
-    function checkWin() public view returns (bool) {
+    function checkWin() public view returns (bool isWinner) {
         // under construction
         // NFT.ownerOf?
+        if (s_raffleState.isOpen) {
+            revert Raffle__NotDone();
+        }
+        
+    
     }
 
     /* utils */

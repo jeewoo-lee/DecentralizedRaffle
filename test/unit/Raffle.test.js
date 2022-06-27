@@ -8,7 +8,12 @@ const INTERVAL = 120
 !developmentChains.includes(network.name)
     ? describe.skip
     : describe("Raffle Unit Tests", function () {
-          let raffleFactory, raffleFactoryContract, vrfCoordinatorV2Mock, raffleMinInput, deployer, raffleContract
+          let raffleFactory,
+              raffleFactoryContract,
+              vrfCoordinatorV2Mock,
+              raffleMinInput,
+              deployer,
+              raffleContract
           beforeEach(async () => {
               accounts = await ethers.getSigners()
               deployer = accounts[0]
@@ -51,6 +56,8 @@ const INTERVAL = 120
                   expect(theAddress).to.not.equal(0)
                   const raffleContract = await ethers.getContractAt("Raffle", theAddress)
                   assert(await raffleContract.i_minInputMoney(), raffleMinInput)
+                  const raffleState = await raffleContract.s_raffleState()
+                  assert(raffleState.raffleId, 1)
               })
           })
 
