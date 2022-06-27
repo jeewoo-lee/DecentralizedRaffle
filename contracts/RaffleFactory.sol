@@ -50,8 +50,8 @@ contract RaffleFactory {
         }
 
         Raffle theRaffle = new Raffle(
-            nftAddress,
             vrfAddress,
+            nftAddress,
             owner,
             minInput,
             _itemPrice,
