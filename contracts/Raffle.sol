@@ -13,6 +13,8 @@ struct RaffleState {
 }
 
 error Raffle__NotDone();
+error Raffle__NotOwner();
+error Raffle__NotCompleted();
 error Raffle__NotEnoughMoney();
 error Raffle__TransferFailed();
 error Raffle__NotOpen();
@@ -126,7 +128,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         uint256, /*requestId*/
         uint256[] memory randomWords
     ) internal override {
-        s_winNum = randomWords[0] % i_nft.getLastValOf(s_raffleState.raffleId); //100 should be lastval from NFT.sol
+        s_winNum = randomWords[0] % (i_nft.getLastValOf(s_raffleState.raffleId) - 1); //100 should be lastval from NFT.sol
         // s_lastTimeStamp = block.timestamp;
         // (bool success, ) = recentWinner.call{value: address(this).balance}("");
         // if (!success) {
@@ -150,7 +152,6 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
         s_total_deposited += amount;
         s_squared_total += sqrt(amount);
-        
 
         // call NFT.sol's minting function here
         uint256 id = i_nft.mint(s_raffleState.raffleId, msg.sender, sqrt(amount), amount);
@@ -199,11 +200,26 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     /*
      * checkWin allow people to confirm if they won with NFT they hold.
      */
-    function checkWin() public view returns (bool isWinner) {
+    function checkWin(uint256 _tokenId) public view returns (bool isWinner) {
         // under construction
         // NFT.ownerOf?
         if (s_raffleState.isOpen) {
             revert Raffle__NotDone();
+        }
+        if (s_canUserWithdraw) {
+            revert Raffle__NotCompleted();
+        }
+        if (i_nft.ownerOf(_tokenId) != msg.sender) {
+            revert Raffle__NotOwner();
+        }
+
+        uint256 lowVal = i_nft.getTokenDataOf(_tokenId).lowVal;
+        uint256 highVal = i_nft.getTokenDataOf(_tokenId).highVal;
+
+        if (lowVal <= s_winNum && s_winNum < highVal) {
+            isWinner = true;
+        } else {
+            isWinner = false;
         }
     }
 

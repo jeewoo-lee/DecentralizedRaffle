@@ -55,9 +55,10 @@ contract NFT is ERC721, Ownable {
             revert NFT__InvalidRaffleAddress();
         }
         uint256 lowVal = s_raffleIdToLastVal[_raffleId];
+        uint256 highVal = _squareDeposited + lowVal;
         s_tokenIdToTokenData[s_tokenId] = TokenData(
             lowVal,
-            (_squareDeposited + lowVal),
+            highVal,
             _squareDeposited,
             _amountDeposited,
             _raffleId
@@ -65,6 +66,7 @@ contract NFT is ERC721, Ownable {
         _mint(_userAddress, s_tokenId);
         id = s_tokenId;
         s_tokenId++;
+        s_raffleIdToLastVal[_raffleId] = highVal;
         emit NFT__MINTED();
     }
 
