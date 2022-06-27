@@ -38,7 +38,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     uint256 public immutable i_item_price;
     uint256 private s_winNum;
     address private immutable s_owner; // might be removed later.
-    mapping(address => uint256) private deposits;
+    mapping(uint256 => uint256) private deposits; // tokenid to amount deposited
     RaffleState public s_raffleState;
 
     /* events */
@@ -150,30 +150,34 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
         s_total_deposited += amount;
         s_squared_total += sqrt(amount);
-        deposits[msg.sender] += amount;
+        
 
         // call NFT.sol's minting function here
-        i_nft.mint(s_raffleState.raffleId, msg.sender, sqrt(amount), amount);
+        uint256 id = i_nft.mint(s_raffleState.raffleId, msg.sender, sqrt(amount), amount);
+        deposits[id] += amount;
     }
 
     /*
      * withdraw allows users to withdraw amount they have deposited when the raffle deposit goal hasn’t met in time.
      */
-    function withrdaw() public {
+    function withrdaw(uint256 _tokenId) public {
         if (!s_canUserWithdraw) {
             revert Raffle__CannotWithdraw("No one can withdraw yet!");
         }
-        if (deposits[msg.sender] <= 0) {
+        if (i_nft.ownerOf(_tokenId) != msg.sender) {
+            revert Raffle__CannotWithdraw("You aren't the owner of the ticket!");
+        }
+        if (deposits[_tokenId] <= 0) {
             revert Raffle__CannotWithdraw("Doesn't have matic to withdraw!");
         }
-        
-        s_total_deposited -= deposits[msg.sender];
+
+        s_total_deposited -= deposits[_tokenId];
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
 
         if (!success) {
             revert Raffle__TransferFailed();
         }
-        deposits[msg.sender] = 0;
+        deposits[_tokenId] = 0;
         emit Withdrawed(msg.sender);
     }
 
@@ -201,8 +205,6 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         if (s_raffleState.isOpen) {
             revert Raffle__NotDone();
         }
-        
-    
     }
 
     /* utils */

@@ -50,7 +50,7 @@ contract NFT is ERC721, Ownable {
         address _userAddress,
         uint256 _squareDeposited,
         uint256 _amountDeposited
-    ) public {
+    ) public returns (uint256 id) {
         if (s_raffleAddresses[msg.sender] == 0) {
             revert NFT__InvalidRaffleAddress();
         }
@@ -63,6 +63,7 @@ contract NFT is ERC721, Ownable {
             _raffleId
         );
         _mint(_userAddress, s_tokenId);
+        id = s_tokenId;
         s_tokenId++;
         emit NFT__MINTED();
     }
