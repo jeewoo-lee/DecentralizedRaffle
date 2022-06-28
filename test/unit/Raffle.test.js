@@ -220,8 +220,11 @@ const INTERVAL = 120
           describe("fulfillRandomWords", function () {
               beforeEach(async () => {
                   await raffleContract.enterRaffle({ value: raffleMinInput })
+                  let raffle = raffleContract.connect(accounts[2])
+                  await raffle.enterRaffle({ value: ITEM_PRICE })
                   await network.provider.send("evm_increaseTime", [INTERVAL + 1])
                   await network.provider.request({ method: "evm_mine", params: [] })
+                  console.log((await nftContract.getLastValOf(0)).toString())
               })
               it("can only be called after performUpkeep", async () => {
                   await expect(
@@ -230,6 +233,22 @@ const INTERVAL = 120
                   await expect(
                       vrfCoordinatorV2Mock.fulfillRandomWords(1, raffleContract.address)
                   ).to.be.revertedWith("nonexistent request")
+              })
+              it("picks the winning number", async () => {
+                  await new Promise(async (resolve, reject) => {
+                      console.log("fsfsddsfssdsf")
+                      raffleContract.once("WinnerPicked", async () => {
+                          console.log("Winner Picked!")
+
+                          try {
+                              const winNum = await raffleContract.s_winNum()
+                              console.log(winNum.toString())
+                              resolve()
+                          } catch (e) {
+                              reject(e)
+                          }
+                      })
+                  })
               })
           })
       })

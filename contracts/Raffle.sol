@@ -38,7 +38,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     uint256 public s_total_deposited = 0;
     uint256 public s_squared_total = 0;
     uint256 public immutable i_item_price;
-    uint256 private s_winNum;
+    uint256 public s_winNum;
     address private immutable s_owner; // might be removed later.
     mapping(uint256 => uint256) private deposits; // tokenid to amount deposited
     RaffleState public s_raffleState;
@@ -46,7 +46,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     /* events */
     event RequestedRaffleWinner(uint256 indexed requestId);
     event RaffleEnter(address indexed player, uint256 amount);
-    event WinnerPicked(address indexed player);
+    event WinnerPicked(uint256 indexed winNum);
     event WinnerAlerted(address indexed player);
     event Withdrawed(address indexed player);
     event LoserAlerted(address indexed player);
@@ -138,7 +138,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         // if (!success) {
         //     revert Raffle__TransferFailed();
         // }
-        // emit WinnerPicked(recentWinner);
+        emit WinnerPicked(randomWords[0]);
     }
 
     /*
@@ -207,16 +207,9 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     function checkWin(uint256 _tokenId) public view returns (bool isWinner) {
         // under construction
         // NFT.ownerOf?
-        if (s_raffleState.isOpen) {
-            revert Raffle__NotDone();
+        if (s_raffleState.isOpen || s_canUserWithdraw) {
+            isWinner = false;
         }
-        if (s_canUserWithdraw) {
-            revert Raffle__NotCompleted();
-        }
-        if (i_nft.ownerOf(_tokenId) != msg.sender) {
-            revert Raffle__NotOwner();
-        }
-
         uint256 lowVal = i_nft.getTokenDataOf(_tokenId).lowVal;
         uint256 highVal = i_nft.getTokenDataOf(_tokenId).highVal;
 
