@@ -170,8 +170,7 @@ const INTERVAL = 120
                   const txResponse = await raffleContract.checkUpkeep("0x")
                   assert(upkeepNeeded)
                   const txReceipt = await txResponse.wait(1)
-                //   console.log(txReceipt.events);
-
+                  //   console.log(txReceipt.events);
               })
           })
 
@@ -191,7 +190,6 @@ const INTERVAL = 120
               })
 
               it("updates the raffle state and emits a requestId", async () => {
-                  // Too many asserts in this test!
                   await raffleContract.enterRaffle({ value: ITEM_PRICE })
                   await network.provider.send("evm_increaseTime", [INTERVAL + 1])
                   await network.provider.request({ method: "evm_mine", params: [] })
@@ -202,8 +200,20 @@ const INTERVAL = 120
                   console.log(txReceipt.events)
                   const requestId = txReceipt.events[1].args.requestId
                   assert(requestId.toNumber() > 0)
-                  console.log(requestId.toNumber());
-                  
+                  console.log(requestId.toNumber())
+              })
+
+              it("emits inadequate funding when a funding goal is not reached", async () => {
+                  await raffleContract.enterRaffle({ value: raffleMinInput })
+                  await network.provider.send("evm_increaseTime", [INTERVAL + 1])
+                  await network.provider.request({ method: "evm_mine", params: [] })
+                  const txResponse = await raffleContract.performUpkeep("0x")
+                  const txReceipt = await txResponse.wait(1)
+                  const withdraw = await raffleContract.s_canUserWithdraw()
+                  assert(withdraw == true)
+                  console.log(txReceipt.events);
+                  const msg = txReceipt.events[0].args.msg
+                  assert(msg.toString() == ":(")
               })
           })
       })

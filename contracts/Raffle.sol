@@ -50,6 +50,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     event WinnerAlerted(address indexed player);
     event Withdrawed(address indexed player);
     event LoserAlerted(address indexed player);
+    event InadequateFunding(string msg);
 
     constructor(
         address vrfCoordinatorV2,
@@ -112,7 +113,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         if (s_total_deposited < i_item_price) {
             s_canUserWithdraw = true;
             s_raffleState.isOpen = false;
-            return;
+            emit InadequateFunding(":(");
         }
 
         s_raffleState.isOpen = false;
