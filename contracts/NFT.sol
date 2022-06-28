@@ -54,7 +54,7 @@ contract NFT is ERC721, Ownable {
         uint256 _squareDeposited,
         uint256 _amountDeposited
     ) public returns (uint256 id) {
-        if (s_raffleAddresses[msg.sender] == 0) {
+        if (i_raffleFactory.raffles(_raffleId) != msg.sender) {
             revert NFT__InvalidRaffleAddress();
         }
         uint256 lowVal = s_raffleIdToLastVal[_raffleId];
