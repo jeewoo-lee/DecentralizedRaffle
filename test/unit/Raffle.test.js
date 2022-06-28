@@ -1,6 +1,7 @@
 const { assert, expect } = require("chai")
 const { network, deployments, ethers } = require("hardhat")
 const { developmentChains, networkConfig } = require("../../helper-hardhat-config")
+const { sqrt } = require("../../utils/math")
 
 const ITEM_PRICE = ethers.utils.parseEther("1")
 const INTERVAL = 120
@@ -64,18 +65,18 @@ const INTERVAL = 120
                   console.log(theAddress.toString())
                   expect(theAddress).to.not.equal(0)
                   const raffleContract = await ethers.getContractAt("Raffle", theAddress)
-                  assert(await raffleContract.i_minInputMoney(), raffleMinInput)
+                  assert.equal((await raffleContract.i_minInputMoney()).toString(), raffleMinInput.toString())
                   const raffleState = await raffleContract.s_raffleState()
-                  assert(raffleState.raffleId, 1)
+                  assert.equal(raffleState.raffleId.toString(), "1")
               })
           })
 
           describe("raffle states", function () {
               it("correctly initalizes raffle states", async () => {
                   const raffleState = await raffleContract.s_raffleState()
-                  assert(raffleState.isOpen, true)
-                  assert(raffleState.interval, INTERVAL)
-                  assert(raffleState.raffleId, 0)
+                  assert.equal(raffleState.isOpen, true)
+                  assert.equal(raffleState.interval, INTERVAL)
+                  assert.equal(raffleState.raffleId, 0)
               })
           })
 
@@ -87,11 +88,15 @@ const INTERVAL = 120
               })
 
               it("correctly mints nft and getter functions work", async () => {
-                await raffleContract.enterRaffle({value: raffleMinInput})
-                let total_deposited = await raffleContract.s_total_deposited()
-                expect(total_deposited, raffleMinInput)
-                
-
+                  await raffleContract.enterRaffle({ value: raffleMinInput })
+                  let total_deposited = await raffleContract.s_total_deposited()
+                  assert.equal(total_deposited.toString(), raffleMinInput.toString())
+                  let deposit = await nftContract.getAmountDepostiedOf(1)
+                  assert.equal(deposit.toString(), raffleMinInput.toString())
+                  let tokenData = await nftContract.getTokenDataOf(1)
+                  assert.equal(tokenData.lowVal.toString(), "0")
+                  assert.equal(tokenData.highVal.toString(), Math.round(sqrt(deposit)).toString())
+                  console.log(tokenData.highVal.toString(), Math.round(sqrt(deposit)).toString());
               })
 
               it("reverts with an invalid token id", async () => {
