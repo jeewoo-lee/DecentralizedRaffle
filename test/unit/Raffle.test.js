@@ -14,6 +14,7 @@ const INTERVAL = 120
               raffleMinInput,
               deployer,
               raffleContract,
+              nftContract,
               samplePlayer
           beforeEach(async () => {
               accounts = await ethers.getSigners()
@@ -32,6 +33,12 @@ const INTERVAL = 120
               await raffleFactory.createRaffle(ITEM_PRICE, INTERVAL)
               const theAddress = await raffleFactory.raffles(0)
               raffleContract = await ethers.getContractAt("Raffle", theAddress)
+
+              /**
+               * NFT contract created when raffleFactory is initialized.
+               */
+              const nftAddress = await raffleFactory.nftAddress()
+              nftContract = await ethers.getContractAt("NFT", nftAddress)
           })
 
           describe("constructor", function () {
@@ -73,13 +80,13 @@ const INTERVAL = 120
           })
 
           describe("NFT", function () {
-              it("correctly intializes nft", async () => {
-                  // how to test enterRaffle()
-              })
               it("reverts when you don't pay enough", async () => {
                   await expect(raffleContract.enterRaffle()).to.be.revertedWith(
                       "Raffle__NotEnoughMoney"
                   )
+              })
+              it("reverts when mint isn't called by raffle address", async () => {
+                  await expect(nftContract.mint(0, samplePlayer.address, 0, 0)).to.be.revertedWith("NFT__InvalidRaffleAddress")
               })
           })
       })
