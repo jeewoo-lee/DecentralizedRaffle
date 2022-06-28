@@ -3,7 +3,7 @@ const { verify } = require("../utils/verify")
 const { developmentChains, networkConfig } = require("../helper-hardhat-config")
 
 console.log("??")
-const MIN_INPUT = ethers.utils.parseEther("1")
+const MIN_INPUT = ethers.utils.parseEther("0.1")
 console.log("???")
 module.exports = async function ({ getNamedAccounts, deployments }) {
     const { deploy, log } = deployments

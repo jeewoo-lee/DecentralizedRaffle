@@ -140,22 +140,22 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     /*
      * enterRaffle allows users to put money and get a raffle ticket (NFT).
      */
-    function enterRaffle(uint256 amount) public payable {
+    function enterRaffle() public payable {
         // amount: amount to fund
         // msg.value: amount + fee
-        if (msg.value - amount > i_minInputMoney) {
+        if (msg.value < i_minInputMoney) {
             revert Raffle__NotEnoughMoney();
         }
         if (s_raffleState.isOpen == false) {
             revert Raffle__NotOpen();
         }
 
-        s_total_deposited += amount;
-        s_squared_total += sqrt(amount);
+        s_total_deposited += msg.value;
+        s_squared_total += sqrt(msg.value);
 
         // call NFT.sol's minting function here
-        uint256 id = i_nft.mint(s_raffleState.raffleId, msg.sender, sqrt(amount), amount);
-        deposits[id] += amount;
+        uint256 id = i_nft.mint(s_raffleState.raffleId, msg.sender, sqrt(msg.value), msg.value);
+        deposits[id] += msg.value;
     }
 
     /*

@@ -13,10 +13,12 @@ const INTERVAL = 120
               vrfCoordinatorV2Mock,
               raffleMinInput,
               deployer,
-              raffleContract
+              raffleContract,
+              samplePlayer
           beforeEach(async () => {
               accounts = await ethers.getSigners()
               deployer = accounts[0]
+              samplePlayer = accounts[1]
               await deployments.fixture(["mocks", "raffle"])
               vrfCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock")
               raffleFactoryContract = await ethers.getContract("RaffleFactory")
@@ -36,7 +38,7 @@ const INTERVAL = 120
               it("correctly initialized", async () => {
                   console.log((await raffleFactory.minInput()).toString())
                   assert.equal(
-                      networkConfig[network.config.chainId]["fee"],
+                      networkConfig[network.config.chainId]["fee"].toString(),
                       raffleMinInput.toString()
                   )
               })
@@ -67,6 +69,17 @@ const INTERVAL = 120
                   assert(raffleState.isOpen, true)
                   assert(raffleState.interval, INTERVAL)
                   assert(raffleState.raffleId, 0)
+              })
+          })
+
+          describe("NFT", function () {
+              it("correctly intializes nft", async () => {
+                  // how to test enterRaffle()
+              })
+              it("reverts when you don't pay enough", async () => {
+                  await expect(raffleContract.enterRaffle()).to.be.revertedWith(
+                      "Raffle__NotEnoughMoney"
+                  )
               })
           })
       })
