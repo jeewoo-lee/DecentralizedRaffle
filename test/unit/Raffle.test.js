@@ -120,7 +120,10 @@ const INTERVAL = 120
                   /**
                    * check if lastVal is updated
                    */
-                  assert.equal((await nftContract.getLastValOf(0)).toString(), tokenData.highVal.toString())
+                  assert.equal(
+                      (await nftContract.getLastValOf(0)).toString(),
+                      tokenData.highVal.toString()
+                  )
               })
 
               it("reverts with an invalid token id", async () => {
@@ -133,6 +136,15 @@ const INTERVAL = 120
                   await expect(nftContract.mint(0, samplePlayer.address, 0, 0)).to.be.revertedWith(
                       "NFT__InvalidRaffleAddress"
                   )
+              })
+          })
+
+          describe("checkUpkeep", function () {
+              it("returns false if people haven't sent any money", async () => {
+                  await network.provider.send("evm_increaseTime", [INTERVAL + 1])
+                  await network.provider.request({ method: "evm_mine", params: [] })
+                  const { upkeepNeeded } = await raffleContract.callStatic.checkUpkeep("0x")
+                  assert(!upkeepNeeded)
               })
           })
       })
