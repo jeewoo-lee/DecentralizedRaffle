@@ -67,7 +67,7 @@ contract RaffleFactory {
     }
 
     function createNFT() internal returns (address) {
-        NFT theNFT = new NFT();
+        NFT theNFT = new NFT(address(this));
         return address(theNFT);
     }
 }

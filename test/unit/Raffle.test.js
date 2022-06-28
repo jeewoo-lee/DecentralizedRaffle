@@ -86,6 +86,14 @@ const INTERVAL = 120
                   )
               })
 
+              it("correctly mints nft and getter functions work", async () => {
+                await raffleContract.enterRaffle({value: raffleMinInput})
+                let total_deposited = await raffleContract.s_total_deposited()
+                expect(total_deposited, raffleMinInput)
+                
+
+              })
+
               it("reverts with an invalid token id", async () => {
                   await expect(nftContract.getAmountDepostiedOf(2442332)).to.be.revertedWith(
                       "NFT__InvalidTokenId"

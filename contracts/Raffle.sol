@@ -24,7 +24,6 @@ error Raffle__UpkeepNotNeeded(uint256 currentBalance, bool raffleState);
 contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     /* chainlink */
     VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
-    NFT private immutable i_nft;
     uint64 private immutable i_subscriptionId;
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
@@ -33,6 +32,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     /* raffle */
     bool public s_canUserWithdraw;
+    NFT private immutable i_nft;
     uint256 public immutable i_minInputMoney;
     uint256 private s_time;
     uint256 public s_total_deposited = 0;

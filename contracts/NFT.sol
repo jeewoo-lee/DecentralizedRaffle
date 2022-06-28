@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "base64-sol/base64.sol";
 import "hardhat/console.sol";
+import "./RaffleFactory.sol";
 
 struct TokenData {
     uint256 lowVal;
@@ -23,6 +24,7 @@ contract NFT is ERC721, Ownable {
     mapping(uint256 => TokenData) private s_tokenIdToTokenData; // tokenId => TokenData instance
     mapping(uint256 => uint256) private s_raffleIdToLastVal; // raffleId =>  Last highVal of the raffle
     mapping(address => uint256) private s_raffleAddresses;
+    RaffleFactory i_raffleFactory;
 
     // address[] public s_nfts;
     uint256 public s_tokenId;
@@ -30,8 +32,9 @@ contract NFT is ERC721, Ownable {
     /* Events */
     event NFT__MINTED();
 
-    constructor() ERC721("Raffle Ticket", "RNFT") {
+    constructor(address raffleFactoryAddress) ERC721("Raffle Ticket", "RNFT") {
         s_tokenId = 1;
+        i_raffleFactory = RaffleFactory(raffleFactoryAddress);
     }
 
     // make funcion that creates a "new key" for s_raffleIdToRaffleData
