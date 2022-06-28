@@ -1,15 +1,5 @@
-# Basic Sample Hardhat Project
+# Decentralized Raffle
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+With $1, you can win Tesla.
 
-Try running some of the following tasks:
-
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
-```
+![image](https://user-images.githubusercontent.com/44099418/176087317-4c52b117-8be2-4693-a186-132a2c750ca9.png)
