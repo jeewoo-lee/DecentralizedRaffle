@@ -167,7 +167,43 @@ const INTERVAL = 120
                   await network.provider.send("evm_increaseTime", [INTERVAL + 1])
                   await network.provider.request({ method: "evm_mine", params: [] })
                   const { upkeepNeeded } = await raffleContract.callStatic.checkUpkeep("0x")
+                  const txResponse = await raffleContract.checkUpkeep("0x")
                   assert(upkeepNeeded)
+                  const txReceipt = await txResponse.wait(1)
+                //   console.log(txReceipt.events);
+
+              })
+          })
+
+          describe("performUpkeep", function () {
+              it("can only run if checkupkeep is true", async () => {
+                  await raffleContract.enterRaffle({ value: raffleMinInput })
+                  await network.provider.send("evm_increaseTime", [INTERVAL + 1])
+                  await network.provider.request({ method: "evm_mine", params: [] })
+                  const tx = await raffleContract.performUpkeep("0x")
+                  assert(tx)
+              })
+
+              it("reverts if checkup is false", async () => {
+                  await expect(raffleContract.performUpkeep("0x")).to.be.revertedWith(
+                      "Raffle__UpkeepNotNeeded"
+                  )
+              })
+
+              it("updates the raffle state and emits a requestId", async () => {
+                  // Too many asserts in this test!
+                  await raffleContract.enterRaffle({ value: ITEM_PRICE })
+                  await network.provider.send("evm_increaseTime", [INTERVAL + 1])
+                  await network.provider.request({ method: "evm_mine", params: [] })
+                  const txResponse = await raffleContract.performUpkeep("0x")
+                  const txReceipt = await txResponse.wait(1)
+                  const raffleState = await raffleContract.s_raffleState()
+                  assert(raffleState.isOpen == false)
+                  console.log(txReceipt.events)
+                  const requestId = txReceipt.events[1].args.requestId
+                  assert(requestId.toNumber() > 0)
+                  console.log(requestId.toNumber());
+                  
               })
           })
       })

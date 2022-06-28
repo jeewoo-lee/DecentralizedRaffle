@@ -94,6 +94,8 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         bool timePassed = (block.timestamp > (s_raffleState.interval + s_time));
         bool hasBalance = address(this).balance > 0;
         upkeepNeeded = (isOpen && timePassed && hasBalance);
+        // test
+        // emit RequestedRaffleWinner(1);
     }
 
     function performUpkeep(
@@ -114,6 +116,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         }
 
         s_raffleState.isOpen = false;
+        // emit RequestedRaffleWinner(11);
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
             i_subscriptionId,
