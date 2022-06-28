@@ -65,7 +65,10 @@ const INTERVAL = 120
                   console.log(theAddress.toString())
                   expect(theAddress).to.not.equal(0)
                   const raffleContract = await ethers.getContractAt("Raffle", theAddress)
-                  assert.equal((await raffleContract.i_minInputMoney()).toString(), raffleMinInput.toString())
+                  assert.equal(
+                      (await raffleContract.i_minInputMoney()).toString(),
+                      raffleMinInput.toString()
+                  )
                   const raffleState = await raffleContract.s_raffleState()
                   assert.equal(raffleState.raffleId.toString(), "1")
               })
@@ -96,7 +99,28 @@ const INTERVAL = 120
                   let tokenData = await nftContract.getTokenDataOf(1)
                   assert.equal(tokenData.lowVal.toString(), "0")
                   assert.equal(tokenData.highVal.toString(), Math.round(sqrt(deposit)).toString())
-                  console.log(tokenData.highVal.toString(), Math.round(sqrt(deposit)).toString());
+                  console.log(tokenData.highVal.toString(), Math.round(sqrt(deposit)).toString())
+
+                  /**
+                   * one more token
+                   */
+
+                  await raffleContract.enterRaffle({ value: raffleMinInput })
+                  total_deposited = await raffleContract.s_total_deposited()
+                  //   assert.equal(total_deposited.toString(), (deposit + raffleMinInput).toString())
+                  deposit = await nftContract.getAmountDepostiedOf(2)
+                  assert.equal(deposit.toString(), raffleMinInput.toString())
+                  tokenData = await nftContract.getTokenDataOf(2)
+                  assert.equal(tokenData.lowVal.toString(), Math.round(sqrt(deposit)).toString())
+                  assert.equal(
+                      tokenData.highVal.toString(),
+                      Math.round(2 * sqrt(deposit)).toString()
+                  )
+
+                  /**
+                   * check if lastVal is updated
+                   */
+                  assert.equal((await nftContract.getLastValOf(0)).toString(), tokenData.highVal.toString())
               })
 
               it("reverts with an invalid token id", async () => {
