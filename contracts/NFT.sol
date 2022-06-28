@@ -93,6 +93,9 @@ contract NFT is ERC721, Ownable {
      * This function will be used in displaying information of the NFT.
      */
     function getAmountDepostiedOf(uint256 _tokenId) public view returns (uint256 amountDeposited) {
+        if (_tokenId < 1 || _tokenId >= s_tokenId) {
+            revert NFT__InvalidTokenId();
+        }
         amountDeposited = s_tokenIdToTokenData[_tokenId].amountDeposited;
     }
 }

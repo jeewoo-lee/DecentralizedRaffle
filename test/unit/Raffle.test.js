@@ -85,8 +85,17 @@ const INTERVAL = 120
                       "Raffle__NotEnoughMoney"
                   )
               })
+
+              it("reverts with an invalid token id", async () => {
+                  await expect(nftContract.getAmountDepostiedOf(2442332)).to.be.revertedWith(
+                      "NFT__InvalidTokenId"
+                  )
+              })
+
               it("reverts when mint isn't called by raffle address", async () => {
-                  await expect(nftContract.mint(0, samplePlayer.address, 0, 0)).to.be.revertedWith("NFT__InvalidRaffleAddress")
+                  await expect(nftContract.mint(0, samplePlayer.address, 0, 0)).to.be.revertedWith(
+                      "NFT__InvalidRaffleAddress"
+                  )
               })
           })
       })
