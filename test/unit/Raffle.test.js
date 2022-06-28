@@ -211,9 +211,25 @@ const INTERVAL = 120
                   const txReceipt = await txResponse.wait(1)
                   const withdraw = await raffleContract.s_canUserWithdraw()
                   assert(withdraw == true)
-                  console.log(txReceipt.events);
+                  console.log(txReceipt.events)
                   const msg = txReceipt.events[0].args.msg
                   assert(msg.toString() == ":(")
+              })
+          })
+
+          describe("fulfillRandomWords", function () {
+              beforeEach(async () => {
+                  await raffleContract.enterRaffle({ value: raffleMinInput })
+                  await network.provider.send("evm_increaseTime", [INTERVAL + 1])
+                  await network.provider.request({ method: "evm_mine", params: [] })
+              })
+              it("can only be called after performUpkeep", async () => {
+                  await expect(
+                      vrfCoordinatorV2Mock.fulfillRandomWords(0, raffleContract.address)
+                  ).to.be.revertedWith("nonexistent request")
+                  await expect(
+                      vrfCoordinatorV2Mock.fulfillRandomWords(1, raffleContract.address)
+                  ).to.be.revertedWith("nonexistent request")
               })
           })
       })

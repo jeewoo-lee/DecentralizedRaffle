@@ -198,7 +198,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
      */
     function tokenChances(uint256 tokenId) public view returns (uint256 chance) {
         // get tokenData from NFT contract
-        chance = i_nft.getTokenDataOf(tokenId).sqAmount / s_squared_total;
+        chance = (100 * i_nft.getTokenDataOf(tokenId).sqAmount) / s_squared_total;
     }
 
     /*
