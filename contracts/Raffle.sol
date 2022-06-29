@@ -39,7 +39,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     uint256 public s_squared_total = 0;
     uint256 public immutable i_item_price;
     uint256 public s_winNum;
-    address private immutable s_owner; // might be removed later.
+    address public immutable i_owner; // might be removed later.
     mapping(uint256 => uint256) private deposits; // tokenid to amount deposited
     RaffleState public s_raffleState;
 
@@ -73,7 +73,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         s_raffleState = RaffleState(true, _interval, _raffleID);
         i_item_price = _itemPrice;
         s_time = block.timestamp;
-        s_owner = _owner;
+        i_owner = _owner;
         i_nft.createRaffleTicket(_raffleID, address(this));
     }
 
@@ -134,10 +134,10 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     ) internal override {
         s_winNum = randomWords[0] % (i_nft.getLastValOf(s_raffleState.raffleId) - 1); //100 should be lastval from NFT.sol
         // s_lastTimeStamp = block.timestamp;
-        // (bool success, ) = recentWinner.call{value: address(this).balance}("");
-        // if (!success) {
-        //     revert Raffle__TransferFailed();
-        // }
+        (bool success, ) = i_owner.call{value: address(this).balance}("");
+        if (!success) {
+            revert Raffle__TransferFailed();
+        }
         emit WinnerPicked(randomWords[0]);
     }
 

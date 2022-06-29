@@ -16,7 +16,8 @@ const INTERVAL = 120
               deployer,
               raffleContract,
               nftContract,
-              samplePlayer
+              samplePlayer,
+              owner
           beforeEach(async () => {
               accounts = await ethers.getSigners()
               deployer = accounts[0]
@@ -27,13 +28,13 @@ const INTERVAL = 120
               raffleFactory = raffleFactoryContract.connect(deployer)
               raffleMinInput = await raffleFactory.minInput()
               console.log("Deployer: ", deployer.address.toString())
-
               /**
                * create raffle contract for testing purposes later on.
                */
               await raffleFactory.createRaffle(ITEM_PRICE, INTERVAL)
               const theAddress = await raffleFactory.raffles(0)
               raffleContract = await ethers.getContractAt("Raffle", theAddress)
+              owner = raffleContract.i_owner()
 
               /**
                * NFT contract created when raffleFactory is initialized.
@@ -191,6 +192,7 @@ const INTERVAL = 120
 
               it("updates the raffle state and emits a requestId", async () => {
                   await raffleContract.enterRaffle({ value: ITEM_PRICE })
+                  await raffleContract.enterRaffle({ value: ITEM_PRICE })
                   await network.provider.send("evm_increaseTime", [INTERVAL + 1])
                   await network.provider.request({ method: "evm_mine", params: [] })
                   const txResponse = await raffleContract.performUpkeep("0x")
@@ -201,6 +203,11 @@ const INTERVAL = 120
                   const requestId = txReceipt.events[1].args.requestId
                   assert(requestId.toNumber() > 0)
                   console.log(requestId.toNumber())
+                  // test
+                  console.log((await accounts[0].getBalance()).toString())
+                  await vrfCoordinatorV2Mock.fulfillRandomWords(1, raffleContract.address)
+                  console.log("Win Num:", (await raffleContract.s_winNum()).toString())
+                  console.log((await accounts[0].getBalance()).toString())
               })
 
               it("emits inadequate funding when a funding goal is not reached", async () => {
@@ -239,7 +246,6 @@ const INTERVAL = 120
                       console.log("fsfsddsfssdsf")
                       raffleContract.once("WinnerPicked", async () => {
                           console.log("Winner Picked!")
-
                           try {
                               const winNum = await raffleContract.s_winNum()
                               console.log(winNum.toString())

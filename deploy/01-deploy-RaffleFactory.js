@@ -4,6 +4,7 @@ const { developmentChains, networkConfig } = require("../helper-hardhat-config")
 
 console.log("??")
 const MIN_INPUT = ethers.utils.parseEther("0.1")
+const FUND_AMOUNT = "1000000000000000000000"
 console.log("???")
 module.exports = async function ({ getNamedAccounts, deployments }) {
     const { deploy, log } = deployments
@@ -11,7 +12,7 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     const chainId = network.config.chainId
     let vrfCoordinatorV2Address, subscriptionId
 
-    console.log("fdffd");
+    console.log("fdffd")
     const gasLane = networkConfig[chainId]["gasLane"]
     const entranceFee = networkConfig[chainId]["entranceFee"]
     const callbackGasLimit = networkConfig[chainId].callbackGasLimit
@@ -24,8 +25,10 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
         const transactionResponse = await vrfCoordinatorV2Mock.createSubscription()
         const transactionReceipt = await transactionResponse.wait(1)
         subscriptionId = transactionReceipt.events[0].args.subId
+        console.log("mock vrf deployed")
         // Fund the subscription
         // Usually, you'd need the link token on a real network        await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, VRF_SUB_FUND_AMOUNT)
+        await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, FUND_AMOUNT)
     } else {
         vrfCoordinatorV2Address = networkConfig[chainId].vrfCoordinatorV2
         subscriptionId = networkConfig[chainId].subscriptionId
