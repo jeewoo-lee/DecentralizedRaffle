@@ -268,20 +268,29 @@ const INTERVAL = 120
 
                   assert.equal(await raffleContract.checkWin(3), true)
               })
-              //   it("picks the winning number", async () => {
-              //       await new Promise(async (resolve, reject) => {
-              //           console.log("fsfsddsfssdsf")
-              //           raffleContract.once("WinnerPicked", async () => {
-              //               console.log("Winner Picked!")
-              //               try {
-              //                   const winNum = await raffleContract.s_winNum()
-              //                   console.log(winNum.toString())
-              //                   resolve()
-              //               } catch (e) {
-              //                   reject(e)
-              //               }
-              //           })
-              //       })
-              //   })
+
+              it("picks the winning number", async () => {
+                  await new Promise(async (resolve, reject) => {
+                      console.log("fsfsddsfssdsf")
+                      raffleContract.once("WinnerPicked", async () => {
+                          console.log("Winner Picked!")
+                          try {
+                              const winNum = await raffleContract.s_winNum()
+                              console.log(winNum.toString())
+                              assert(winNum.toNumber() != 0) 
+                              resolve() 
+                          } catch (e) {
+                              reject(e)
+                          }
+                      })
+                      const txResponse = await raffleContract.performUpkeep("0x")
+                      const txReceipt = await txResponse.wait(1)
+                      const requestId = txReceipt.events[1].args.requestId
+                      await vrfCoordinatorV2Mock.fulfillRandomWords(
+                          requestId,
+                          raffleContract.address
+                      )
+                  })
+              })
           })
       })
