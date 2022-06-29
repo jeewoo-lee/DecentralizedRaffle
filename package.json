@@ -18,8 +18,9 @@
     "solidity-coverage": "^0.7.21"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.6.0",
+    "@openzeppelin/contracts": "^4.7.0",
     "base64-sol": "^1.1.0",
-    "hardhat-shorthand": "^1.0.0"
+    "hardhat-shorthand": "^1.0.0",
+    "openzeppelin-contracts": "^4.0.0"
   }
 }

@@ -629,10 +629,10 @@
     "@types/sinon-chai" "^3.2.3"
     "@types/web3" "1.0.19"
 
-"@openzeppelin/contracts@^4.6.0":
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.6.0.tgz#c91cf64bc27f573836dba4122758b4743418c1b3"
-  integrity sha512-8vi4d50NNya/bQqCmaVzvHNmwHvS0OBKb7HNtuNwEE3scXWrP31fKQoGxNMT+KbzmrNZzatE3QK5p2gFONI/hg==
+"@openzeppelin/contracts@^4.7.0":
+  version "4.7.0"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.7.0.tgz#3092d70ea60e3d1835466266b1d68ad47035a2d5"
+  integrity sha512-52Qb+A1DdOss8QvJrijYYPSf32GUg2pGaG/yCxtaA3cu4jduouTdg4XZSMLW9op54m1jH7J8hoajhHKOPsoJFw==
 
 "@resolver-engine/core@^0.3.3":
   version "0.3.3"
@@ -6781,6 +6781,11 @@ open@^7.4.2:
   dependencies:
     is-docker "^2.0.0"
     is-wsl "^2.1.1"
+
+openzeppelin-contracts@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/openzeppelin-contracts/-/openzeppelin-contracts-4.0.0.tgz#3b56ae3c5f6a59eaca2eacf935e3ebc18a59cd78"
+  integrity sha512-SlBeiWSJKhX9EY2Nlgev4P/LMBWWSk6wL+eqikAe9gODpxrQwLOx4Rw3vyHuJaChrUTlGyR4Gl1NqJMw0J15eQ==
 
 optionator@^0.8.1, optionator@^0.8.2:
   version "0.8.3"

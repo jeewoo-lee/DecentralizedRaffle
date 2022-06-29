@@ -5,6 +5,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 import "./NFT.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 
 struct RaffleState {
     bool isOpen;
@@ -159,10 +160,15 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         }
 
         s_total_deposited += msg.value;
-        s_squared_total += sqrt(msg.value);
+        s_squared_total += Math.sqrt(msg.value);
 
         // call NFT.sol's minting function here
-        uint256 id = i_nft.mint(s_raffleState.raffleId, msg.sender, sqrt(msg.value), msg.value);
+        uint256 id = i_nft.mint(
+            s_raffleState.raffleId,
+            msg.sender,
+            Math.sqrt(msg.value),
+            msg.value
+        );
         deposits[id] += msg.value;
     }
 
@@ -214,22 +220,6 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
             isWinner = true;
         } else {
             isWinner = false;
-        }
-    }
-
-    /* utils */
-    // babylonian method (https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method)
-    // from https://github.com/Uniswap/v2-core/blob/4dd59067c76dea4a0e8e4bfdda41877a6b16dedc/contracts/libraries/Math.sol#L11-L22
-    function sqrt(uint256 y) internal pure returns (uint256 z) {
-        if (y > 3) {
-            z = y;
-            uint256 x = y / 2 + 1;
-            while (x < z) {
-                z = x;
-                x = (y / x + x) / 2;
-            }
-        } else if (y != 0) {
-            z = 1;
         }
     }
 }
