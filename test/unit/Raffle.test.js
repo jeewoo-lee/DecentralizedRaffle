@@ -28,9 +28,11 @@ const INTERVAL = 120
               raffleFactory = raffleFactoryContract.connect(deployer)
               raffleMinInput = await raffleFactory.minInput()
               console.log("Deployer: ", deployer.address.toString())
+
               /**
                * create raffle contract for testing purposes later on.
                */
+              
               await raffleFactory.createRaffle(ITEM_PRICE, INTERVAL)
               const theAddress = await raffleFactory.raffles(0)
               raffleContract = await ethers.getContractAt("Raffle", theAddress)
