@@ -14,7 +14,18 @@ developmentChains.includes(network.name)
               /**
                * NFT Contract
                */
+
               const nftAddress = await raffleFactory.nftAddress()
               nftContract = await ethers.getContractAt("NFT", nftAddress)
+
+              /**
+               * create raffle contract for testing purposes later on.
+               */
+
+              await raffleFactory.createRaffle(ITEM_PRICE, INTERVAL)
+              const theAddress = await raffleFactory.raffles(0)
+              raffleContract = await ethers.getContractAt("Raffle", theAddress)
+              owner = await raffleContract.i_owner()
+              console.log("Owner:", owner)
           })
       })

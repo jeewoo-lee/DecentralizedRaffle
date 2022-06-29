@@ -35,9 +35,10 @@ contract RaffleFactory {
         uint64 _subscriptionID,
         uint32 _callbackGasLimit
     ) {
+        NFT theNFT = new NFT(address(this));
         owner = msg.sender; // Whoever deploys smart contract becomes the owner
         minInput = _minInput;
-        nftAddress = createNFT();
+        nftAddress = address(theNFT);
         vrfAddress = _vrfAddress;
         gasLane = _gasLane;
         subscriptionID = _subscriptionID;
@@ -64,10 +65,5 @@ contract RaffleFactory {
 
         raffles[raffleId] = address(theRaffle);
         raffleId++;
-    }
-
-    function createNFT() internal returns (address) {
-        NFT theNFT = new NFT(address(this));
-        return address(theNFT);
     }
 }

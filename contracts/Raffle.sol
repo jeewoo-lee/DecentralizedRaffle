@@ -128,6 +128,10 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         emit RequestedRaffleWinner(requestId);
     }
 
+    /**
+     * fulfillRandomWords is called by Chainlink VRF after performUpkeep calls requestRandomWords from vrfCoordinator.
+     */
+
     function fulfillRandomWords(
         uint256, /*requestId*/
         uint256[] memory randomWords
@@ -184,13 +188,6 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         }
         deposits[_tokenId] = 0;
         emit Withdrawed(msg.sender);
-    }
-
-    /*
-     * potentialChances calculate potential chances for user to win the raffle
-     */
-    function potentialChances(uint256 amount) public view returns (uint256 chance) {
-        chance = (sqrt(amount)) / (s_squared_total + sqrt(amount));
     }
 
     /*
