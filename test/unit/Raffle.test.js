@@ -32,7 +32,7 @@ const INTERVAL = 120
               /**
                * create raffle contract for testing purposes later on.
                */
-              
+
               await raffleFactory.createRaffle(ITEM_PRICE, INTERVAL)
               const theAddress = await raffleFactory.raffles(0)
               raffleContract = await ethers.getContractAt("Raffle", theAddress)
@@ -154,6 +154,7 @@ const INTERVAL = 120
                   const { upkeepNeeded } = await raffleContract.callStatic.checkUpkeep("0x")
                   assert(!upkeepNeeded)
               })
+
               it("returns false if raffle isn't open", async () => {
                   await raffleContract.enterRaffle({ value: raffleMinInput })
                   await network.provider.send("evm_increaseTime", [INTERVAL + 1])
@@ -163,6 +164,7 @@ const INTERVAL = 120
                   const { upkeepNeeded } = await raffleContract.callStatic.checkUpkeep("0x")
                   assert.equal(raffleState.isOpen == false, upkeepNeeded == false)
               })
+
               it("returns false if enough time hasn't passed", async () => {
                   await raffleContract.enterRaffle({ value: raffleMinInput })
                   await network.provider.send("evm_increaseTime", [INTERVAL - 1])
@@ -170,6 +172,7 @@ const INTERVAL = 120
                   const { upkeepNeeded } = await raffleContract.callStatic.checkUpkeep("0x")
                   assert(!upkeepNeeded)
               })
+
               it("returns true if enough time has passed, has players, eth, and is open", async () => {
                   await raffleContract.enterRaffle({ value: raffleMinInput })
                   await network.provider.send("evm_increaseTime", [INTERVAL + 1])
@@ -211,12 +214,7 @@ const INTERVAL = 120
                   console.log(txReceipt.events)
                   const requestId = txReceipt.events[1].args.requestId
                   assert(requestId.toNumber() > 0)
-                  console.log(requestId.toNumber())
-                  // test
-                  console.log((await accounts[0].getBalance()).toString())
-                  await vrfCoordinatorV2Mock.fulfillRandomWords(1, raffleContract.address)
-                  console.log("Win Num:", (await raffleContract.s_winNum()).toString())
-                  console.log((await accounts[0].getBalance()).toString())
+                  console.log("RequestId:", requestId.toNumber())
               })
 
               it("emits inadequate funding when a funding goal is not reached", async () => {
@@ -279,8 +277,8 @@ const INTERVAL = 120
                           try {
                               const winNum = await raffleContract.s_winNum()
                               console.log(winNum.toString())
-                              assert(winNum.toNumber() != 0) 
-                              resolve() 
+                              assert(winNum.toNumber() != 0)
+                              resolve()
                           } catch (e) {
                               reject(e)
                           }
