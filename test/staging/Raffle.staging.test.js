@@ -5,4 +5,16 @@ const { sqrt } = require("../../utils/math")
 
 developmentChains.includes(network.name)
     ? describe.skip
-    : describe("Raffle Staging Test", function () {})
+    : describe("Raffle Staging Test", function () {
+          let raffleFactory, raffleMinInput, deployer, raffleContract, nftContract, owner
+          beforeEach(async function () {
+              deployer = (await getNamedAccounts()).deployer
+              raffleFactory = await ethers.getContract("RaffleFactory", deployer)
+
+              /**
+               * NFT Contract
+               */
+              const nftAddress = await raffleFactory.nftAddress()
+              nftContract = await ethers.getContractAt("NFT", nftAddress)
+          })
+      })
