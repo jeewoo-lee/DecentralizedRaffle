@@ -34,7 +34,8 @@ const INTERVAL = 120
               await raffleFactory.createRaffle(ITEM_PRICE, INTERVAL)
               const theAddress = await raffleFactory.raffles(0)
               raffleContract = await ethers.getContractAt("Raffle", theAddress)
-              owner = raffleContract.i_owner()
+              owner = await raffleContract.i_owner()
+              console.log("Owner:", owner)
 
               /**
                * NFT contract created when raffleFactory is initialized.
@@ -117,6 +118,10 @@ const INTERVAL = 120
                       tokenData.highVal.toString(),
                       Math.round(2 * sqrt(deposit)).toString()
                   )
+                  assert.equal(
+                      (await nftContract.getAmountDepostiedOf(2)).toString(),
+                      raffleMinInput.toString()
+                  )
 
                   /**
                    * check if lastVal is updated
@@ -191,7 +196,9 @@ const INTERVAL = 120
               })
 
               it("updates the raffle state and emits a requestId", async () => {
-                  await raffleContract.enterRaffle({ value: ITEM_PRICE })
+                  console.log((await accounts[1].getBalance()).toString())
+                  console.log((await accounts[0].getBalance()).toString())
+                  await raffleContract.connect(accounts[1]).enterRaffle({ value: ITEM_PRICE })
                   await raffleContract.enterRaffle({ value: ITEM_PRICE })
                   await network.provider.send("evm_increaseTime", [INTERVAL + 1])
                   await network.provider.request({ method: "evm_mine", params: [] })
@@ -241,20 +248,40 @@ const INTERVAL = 120
                       vrfCoordinatorV2Mock.fulfillRandomWords(1, raffleContract.address)
                   ).to.be.revertedWith("nonexistent request")
               })
-              it("picks the winning number", async () => {
-                  await new Promise(async (resolve, reject) => {
-                      console.log("fsfsddsfssdsf")
-                      raffleContract.once("WinnerPicked", async () => {
-                          console.log("Winner Picked!")
-                          try {
-                              const winNum = await raffleContract.s_winNum()
-                              console.log(winNum.toString())
-                              resolve()
-                          } catch (e) {
-                              reject(e)
-                          }
-                      })
-                  })
+              it("can check win", async () => {
+                  assert.equal(await raffleContract.checkWin(2), false)
+                  console.log("------------------------")
+                  await raffleContract.connect(accounts[1]).enterRaffle({ value: ITEM_PRICE })
+                  await network.provider.send("evm_increaseTime", [INTERVAL + 1])
+                  await network.provider.request({ method: "evm_mine", params: [] })
+
+                  const txResponse = await raffleContract.performUpkeep("0x")
+                  const txReceipt = await txResponse.wait(1)
+                  const requestId = txReceipt.events[1].args.requestId
+
+                  console.log((await accounts[0].getBalance()).toString())
+                  await vrfCoordinatorV2Mock.fulfillRandomWords(requestId, raffleContract.address)
+                  console.log("Win Num:", (await raffleContract.s_winNum()).toString())
+                  console.log((await accounts[0].getBalance()).toString())
+
+                  console.log("Tokens:", (await nftContract.s_tokenId()).toString())
+
+                  assert.equal(await raffleContract.checkWin(3), true)
               })
+              //   it("picks the winning number", async () => {
+              //       await new Promise(async (resolve, reject) => {
+              //           console.log("fsfsddsfssdsf")
+              //           raffleContract.once("WinnerPicked", async () => {
+              //               console.log("Winner Picked!")
+              //               try {
+              //                   const winNum = await raffleContract.s_winNum()
+              //                   console.log(winNum.toString())
+              //                   resolve()
+              //               } catch (e) {
+              //                   reject(e)
+              //               }
+              //           })
+              //       })
+              //   })
           })
       })
