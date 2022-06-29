@@ -180,8 +180,6 @@ const INTERVAL = 120
                   const { upkeepNeeded } = await raffleContract.callStatic.checkUpkeep("0x")
                   const txResponse = await raffleContract.checkUpkeep("0x")
                   assert(upkeepNeeded)
-                  const txReceipt = await txResponse.wait(1)
-                  //   console.log(txReceipt.events);
               })
           })
 
