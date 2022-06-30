@@ -24,9 +24,11 @@ contract RaffleFactory {
     address public immutable nftAddress;
     address private immutable vrfAddress;
 
-    bytes32 private immutable gasLane;
-    uint64 private immutable subscriptionID;
-    uint32 private immutable callbackGasLimit;
+    bytes32 public immutable i_gasLane;
+    uint64 public immutable i_subscriptionId;
+    uint32 public immutable i_callbackGasLimit;
+    uint16 public constant REQUEST_CONFIRMATIONS = 3;
+    uint32 public constant NUM_WORDS = 1; //for requesting random word from chainlinkvrf
 
     constructor(
         uint256 _minInput,
@@ -40,9 +42,9 @@ contract RaffleFactory {
         minInput = _minInput;
         nftAddress = address(theNFT);
         vrfAddress = _vrfAddress;
-        gasLane = _gasLane;
-        subscriptionID = _subscriptionID;
-        callbackGasLimit = _callbackGasLimit;
+        i_gasLane = _gasLane;
+        i_subscriptionId = _subscriptionID;
+        i_callbackGasLimit = _callbackGasLimit;
     }
 
     function createRaffle(uint256 _itemPrice, uint32 _interval) public {
@@ -58,9 +60,7 @@ contract RaffleFactory {
             _itemPrice,
             raffleId,
             _interval,
-            gasLane,
-            subscriptionID,
-            callbackGasLimit
+            address(this)
         );
 
         raffles[raffleId] = address(theRaffle);

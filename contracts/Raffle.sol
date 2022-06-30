@@ -6,6 +6,7 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 import "./NFT.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
+import "./RaffleFactory.sol";
 
 struct RaffleState {
     bool isOpen;
@@ -25,15 +26,11 @@ error Raffle__UpkeepNotNeeded(uint256 currentBalance, bool raffleState);
 contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     /* chainlink */
     VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
-    uint64 private immutable i_subscriptionId;
-    bytes32 private immutable i_gasLane;
-    uint32 private immutable i_callbackGasLimit;
-    uint16 private constant REQUEST_CONFIRMATIONS = 3;
-    uint32 private constant NUM_WORDS = 1; //for requesting random word from chainlinkvrf
 
     /* raffle */
     bool public s_canUserWithdraw;
     NFT private immutable i_nft;
+    RaffleFactory private immutable i_raffleFactory;
     uint256 public immutable i_minInputMoney;
     uint256 private s_time;
     uint256 public s_total_deposited = 0;
@@ -61,16 +58,12 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         uint256 _itemPrice,
         uint256 _raffleID,
         uint32 _interval,
-        bytes32 _gasLane,
-        uint64 _subscriptionID,
-        uint32 _callbackGasLimit
+        address raffleFactory
     ) VRFConsumerBaseV2(vrfCoordinatorV2) {
         i_nft = NFT(nft);
+        i_raffleFactory = RaffleFactory(raffleFactory);
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
         i_minInputMoney = _minInput;
-        i_gasLane = _gasLane;
-        i_subscriptionId = _subscriptionID;
-        i_callbackGasLimit = _callbackGasLimit;
         s_raffleState = RaffleState(true, _interval, _raffleID);
         i_item_price = _itemPrice;
         s_time = block.timestamp;
@@ -120,11 +113,11 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         s_raffleState.isOpen = false;
         // emit RequestedRaffleWinner(11);
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
-            i_gasLane,
-            i_subscriptionId,
-            REQUEST_CONFIRMATIONS,
-            i_callbackGasLimit,
-            NUM_WORDS
+            i_raffleFactory.i_gasLane(),
+            i_raffleFactory.i_subscriptionId(),
+            i_raffleFactory.REQUEST_CONFIRMATIONS(),
+            i_raffleFactory.i_callbackGasLimit(),
+            i_raffleFactory.NUM_WORDS()
         );
         emit RequestedRaffleWinner(requestId);
     }
