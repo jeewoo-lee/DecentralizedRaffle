@@ -1,4 +1,4 @@
-const { network, ethers } = require("hardhat")
+const { network, ether } = require("hardhat")
 const { verify } = require("../utils/verify")
 const { developmentChains, networkConfig } = require("../helper-hardhat-config")
 
@@ -8,6 +8,7 @@ console.log("???")
 module.exports = async function ({ getNamedAccounts, deployments }) {
     const { deploy, log } = deployments
     const { deployer } = await getNamedAccounts()
+    console.log(deployer.toString())
     const chainId = network.config.chainId
     let vrfCoordinatorV2Address, subscriptionId
 
