@@ -3,8 +3,7 @@ const { verify } = require("../utils/verify")
 const { developmentChains, networkConfig } = require("../helper-hardhat-config")
 
 console.log("??")
-const MIN_INPUT = ethers.utils.parseEther("0.1")
-const FUND_AMOUNT = "1000000000000000000000"
+
 console.log("???")
 module.exports = async function ({ getNamedAccounts, deployments }) {
     const { deploy, log } = deployments
@@ -16,6 +15,7 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     const gasLane = networkConfig[chainId]["gasLane"]
     const entranceFee = networkConfig[chainId]["entranceFee"]
     const callbackGasLimit = networkConfig[chainId].callbackGasLimit
+    const FUND_AMOUNT = "1000000000000000000000"
 
     console.log(gasLane, entranceFee, callbackGasLimit)
 
@@ -36,7 +36,7 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     log("got here")
 
     const arguments = [
-        MIN_INPUT,
+        entranceFee,
         vrfCoordinatorV2Address,
         gasLane,
         subscriptionId,

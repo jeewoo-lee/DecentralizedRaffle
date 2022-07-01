@@ -3,6 +3,9 @@ const { network, deployments, ethers } = require("hardhat")
 const { developmentChains, networkConfig } = require("../../helper-hardhat-config")
 const { sqrt } = require("../../utils/math")
 
+const ITEM_PRICE = ethers.utils.parseEther("0.5")
+const INTERVAL = 120
+
 developmentChains.includes(network.name)
     ? describe.skip
     : describe("Raffle Staging Test", function () {
