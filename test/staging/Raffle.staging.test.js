@@ -37,8 +37,10 @@ developmentChains.includes(network.name)
                           console.log("Winner Picked!")
                           try {
                               const winNum = await raffleContract.s_winNum()
+                              const raffleState = await raffleContract.s_raffleState()
                               console.log(winNum.toString())
                               assert(winNum.toNumber() != 0)
+                              assert(raffleState.isOpen == false)
                               console.log((await accounts[0].getBalance()).toString())
                               resolve()
                           } catch (e) {
