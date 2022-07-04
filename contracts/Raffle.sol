@@ -212,6 +212,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         // NFT.ownerOf?
         if (s_raffleState.isOpen || s_canUserWithdraw) {
             isWinner = false;
+            return isWinner;
         }
         uint256 lowVal = i_nft.getTokenDataOf(_tokenId).lowVal;
         uint256 highVal = i_nft.getTokenDataOf(_tokenId).highVal;

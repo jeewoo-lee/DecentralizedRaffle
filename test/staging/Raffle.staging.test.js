@@ -4,6 +4,9 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
 const { sqrt } = require("../../utils/math")
 const { readFile } = require("../../utils/fs")
 
+const ITEM_PRICE = ethers.utils.parseEther("0.005")
+const entranceFee = networkConfig[network.config.chainId]["entranceFee"]
+
 developmentChains.includes(network.name)
     ? describe.skip
     : describe("Raffle Staging Test", function () {
@@ -12,10 +15,10 @@ developmentChains.includes(network.name)
               deployer = (await getNamedAccounts()).deployer
               raffleFactory = await ethers.getContractAt(
                   "RaffleFactory",
-                  "0x6c6c003eC4F84cc79152fA84B782BD6dd81fB4B9"
+                  "0x62844E4c8F53aFB38d80b454F49EE9462248734c"
               )
 
-              const vrfCoordinatorV2Address = networkConfig[chainId].vrfCoordinatorV2
+              const vrfCoordinatorV2Address = networkConfig[network.config.chainId].vrfCoordinatorV2
 
               /**
                * NFT Contract
@@ -32,6 +35,7 @@ developmentChains.includes(network.name)
 
               console.log(theAddress)
               raffleContract = await ethers.getContractAt("Raffle", theAddress)
+              await raffleContract.startRaffle()
 
               // await raffleFactory.createRaffle(ITEM_PRICE, INTERVAL)
               // const theAddress = await raffleFactory.raffles(0)
@@ -55,16 +59,22 @@ developmentChains.includes(network.name)
                               assert(winNum.toNumber() != 0)
                               assert(raffleState.isOpen == false)
                               console.log((await accounts[0].getBalance()).toString())
+                              console.log(
+                                  await raffleContract.checkWin(1),
+                                  await raffleContract.checkWin(2)
+                              )
+
                               resolve()
                           } catch (e) {
                               reject(e)
                           }
-                          console.log("Entering Raffle...")
-                          const tx = await raffleContract.enterRaffle({ value: raffleEntranceFee })
-                          await tx.wait(1)
-                          console.log("Ok, time to wait...")
-                          console.log((await accounts[0].getBalance()).toString())
                       })
+                      console.log("Entering Raffle...")
+                      const tx = await raffleContract.enterRaffle({ value: entranceFee })
+                      await raffleContract.enterRaffle({ value: ITEM_PRICE })
+                      await tx.wait(1)
+                      console.log("Ok, time to wait...")
+                      console.log((await accounts[0].getBalance()).toString())
                   })
               })
           })
