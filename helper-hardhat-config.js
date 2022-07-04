@@ -11,6 +11,7 @@ const networkConfig = {
         callbackGasLimit: "500000",
         fee: ethers.utils.parseEther("0.1"),
         interval: "30",
+        currentId: "3"
     },
     31337: {
         name: "hardhat",

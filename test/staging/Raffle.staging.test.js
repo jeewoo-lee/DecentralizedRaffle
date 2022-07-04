@@ -2,9 +2,7 @@ const { assert, expect } = require("chai")
 const { getNamedAccounts, network, deployments, ethers } = require("hardhat")
 const { developmentChains, networkConfig } = require("../../helper-hardhat-config")
 const { sqrt } = require("../../utils/math")
-
-const ITEM_PRICE = ethers.utils.parseEther("0.5")
-const INTERVAL = 120
+const { readFile } = require("../../utils/fs")
 
 developmentChains.includes(network.name)
     ? describe.skip
@@ -12,7 +10,12 @@ developmentChains.includes(network.name)
           let raffleFactory, raffleMinInput, deployer, raffleContract, nftContract, owner
           beforeEach(async function () {
               deployer = (await getNamedAccounts()).deployer
-              raffleFactory = await ethers.getContract("RaffleFactory", deployer)
+              raffleFactory = await ethers.getContractAt(
+                  "RaffleFactory",
+                  "0x6c6c003eC4F84cc79152fA84B782BD6dd81fB4B9"
+              )
+
+              const vrfCoordinatorV2Address = networkConfig[chainId].vrfCoordinatorV2
 
               /**
                * NFT Contract
@@ -21,15 +24,22 @@ developmentChains.includes(network.name)
               nftContract = await ethers.getContractAt("NFT", nftAddress)
 
               /**
-               * create raffle contract for testing purposes later on.
+               * raffle contract for testing purposes later on.
                */
-              await raffleFactory.createRaffle(ITEM_PRICE, INTERVAL)
-              const theAddress = await raffleFactory.raffles(0)
+              const theAddress = readFile(
+                  "/Users/leejeewoo/Elysia/Raffle/miscellaneous/.testRaffleAddress"
+              )
+
+              console.log(theAddress)
               raffleContract = await ethers.getContractAt("Raffle", theAddress)
-              owner = await raffleContract.i_owner()
-              console.log("Owner:", owner.toString())
-              console.log("Raffle Address:", theAddress.toString())
-              const accounts = await ethers.getSigners()
+
+              // await raffleFactory.createRaffle(ITEM_PRICE, INTERVAL)
+              // const theAddress = await raffleFactory.raffles(0)
+              // raffleContract = await ethers.getContractAt("Raffle", theAddress)
+              // owner = await raffleContract.i_owner()
+              // console.log("Owner:", owner.toString())
+              // console.log("Raffle Address:", theAddress.toString())
+              // const accounts = await ethers.getSigners()
           })
 
           describe("user experience", function () {

@@ -64,11 +64,18 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         i_raffleFactory = RaffleFactory(raffleFactory);
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
         i_minInputMoney = _minInput;
-        s_raffleState = RaffleState(true, _interval, _raffleID);
+        s_raffleState = RaffleState(false, _interval, _raffleID);
         i_item_price = _itemPrice;
-        s_time = block.timestamp;
         i_owner = _owner;
         i_nft.createRaffleTicket(_raffleID, address(this));
+    }
+
+    /*
+     * Start a raffle; initalizes s_time and set s_raffleState.isOpen to true.
+     */
+    function startRaffle() public {
+        s_time = block.timestamp;
+        s_raffleState.isOpen = true;
     }
 
     /*
