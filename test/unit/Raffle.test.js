@@ -38,6 +38,7 @@ const INTERVAL = 120
               raffleContract = await ethers.getContractAt("Raffle", theAddress)
               owner = await raffleContract.i_owner()
               console.log("Owner:", owner)
+              await raffleContract.startRaffle()
 
               /**
                * NFT contract created when raffleFactory is initialized.
@@ -50,7 +51,7 @@ const INTERVAL = 120
               it("correctly initialized", async () => {
                   console.log((await raffleFactory.minInput()).toString())
                   assert.equal(
-                      networkConfig[network.config.chainId]["fee"].toString(),
+                      networkConfig[network.config.chainId]["entranceFee"].toString(),
                       raffleMinInput.toString()
                   )
               })
@@ -264,7 +265,11 @@ const INTERVAL = 120
 
                   console.log("Tokens:", (await nftContract.s_tokenId()).toString())
 
-                  assert.equal(await raffleContract.checkWin(3), true)
+                  console.log(
+                      await raffleContract.checkWin(1),
+                      await raffleContract.checkWin(2),
+                      await raffleContract.checkWin(3)
+                  )
               })
 
               it("picks the winning number", async () => {
