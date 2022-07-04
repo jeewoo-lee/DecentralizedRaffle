@@ -6,6 +6,7 @@ const { readFile } = require("../../utils/fs")
 
 const ITEM_PRICE = ethers.utils.parseEther("0.005")
 const entranceFee = networkConfig[network.config.chainId]["entranceFee"]
+const feeStuff = networkConfig[network.config.chainId]["fee"]
 
 developmentChains.includes(network.name)
     ? describe.skip
@@ -13,10 +14,10 @@ developmentChains.includes(network.name)
           let raffleFactory, raffleMinInput, deployer, raffleContract, nftContract, owner
           beforeEach(async function () {
               deployer = (await getNamedAccounts()).deployer
-              raffleFactory = await ethers.getContractAt(
-                  "RaffleFactory",
-                  "0x62844E4c8F53aFB38d80b454F49EE9462248734c"
+              const factoryAddress = readFile(
+                  "/Users/leejeewoo/Elysia/Raffle/miscellaneous/.raffleFactoryAddress"
               )
+              raffleFactory = await ethers.getContractAt("RaffleFactory", factoryAddress)
 
               const vrfCoordinatorV2Address = networkConfig[network.config.chainId].vrfCoordinatorV2
 
@@ -56,7 +57,7 @@ developmentChains.includes(network.name)
                               const winNum = await raffleContract.s_winNum()
                               const raffleState = await raffleContract.s_raffleState()
                               console.log(winNum.toString())
-                              assert(winNum.toNumber() != 0)
+                              assert(winNum.toString() != "0")
                               assert(raffleState.isOpen == false)
                               console.log((await accounts[0].getBalance()).toString())
                               console.log(
@@ -71,7 +72,11 @@ developmentChains.includes(network.name)
                       })
                       console.log("Entering Raffle...")
                       const tx = await raffleContract.enterRaffle({ value: entranceFee })
-                      await raffleContract.enterRaffle({ value: ITEM_PRICE })
+                      console.log("here?");
+                      await raffleContract.enterRaffle({ value: entranceFee })
+                      await raffleContract.enterRaffle({ value: feeStuff })
+                    //   await raffleContract.enterRaffle({ value: ITEM_PRICE })
+                      console.log("fdssdf");
                       await tx.wait(1)
                       console.log("Ok, time to wait...")
                       console.log((await accounts[0].getBalance()).toString())

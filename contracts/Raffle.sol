@@ -74,6 +74,9 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
      * Start a raffle; initalizes s_time and set s_raffleState.isOpen to true.
      */
     function startRaffle() public {
+        if (msg.sender != i_owner) {
+            revert Raffle__NotOwner();
+        }
         s_time = block.timestamp;
         s_raffleState.isOpen = true;
     }

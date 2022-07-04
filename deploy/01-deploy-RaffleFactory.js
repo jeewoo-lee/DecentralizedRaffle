@@ -1,6 +1,8 @@
 const { network, ether } = require("hardhat")
 const { verify } = require("../utils/verify")
 const { developmentChains, networkConfig } = require("../helper-hardhat-config")
+const filePath = "/Users/leejeewoo/Elysia/Raffle/miscellaneous/.raffleFactoryAddress"
+const { writeFile, readFile } = require("../utils/fs")
 
 console.log("??")
 
@@ -57,6 +59,8 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
         await verify(raffleFactory.address, arguments)
     }
     log("-------------------------------------------------------------")
+    writeFile(filePath, raffleFactory.address)
+    console.log(raffleFactory.address, readFile(filePath));
 
     log("done!")
 }

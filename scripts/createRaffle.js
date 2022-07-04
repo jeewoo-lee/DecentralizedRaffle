@@ -1,10 +1,10 @@
 const { getNamedAccounts, getSigners, network, ethers } = require("hardhat")
 const { verify } = require("../utils/verify")
-const { writeFile } = require("../utils/fs")
+const { writeFile, readFile } = require("../utils/fs")
 const { developmentChains, networkConfig } = require("../helper-hardhat-config")
 require("dotenv").config()
 
-const ITEM_PRICE = ethers.utils.parseEther("0.005")
+const ITEM_PRICE = ethers.utils.parseEther("0.006")
 const INTERVAL = 60
 const contractABI = require("../deployments/rinkeby/RaffleFactory.json")
 const filePath = "/Users/leejeewoo/Elysia/Raffle/miscellaneous/.testRaffleAddress"
@@ -21,26 +21,34 @@ async function createRaffle() {
 
     const signer = new ethers.Wallet(process.env.PRIVATE_KEY, alchemyProvider)
 
-    const raffleFactory = new ethers.Contract(
-        "0x62844E4c8F53aFB38d80b454F49EE9462248734c",
-        contractABI.abi,
-        signer
+    // const raffleFactory = new ethers.Contract(
+    //     "0x62844E4c8F53aFB38d80b454F49EE9462248734c",
+    //     contractABI.abi,
+    //     signer
+    // )
+
+    const factoryAddress = readFile(
+        "/Users/leejeewoo/Elysia/Raffle/miscellaneous/.raffleFactoryAddress"
     )
+
+    const raffleFactory = await ethers.getContractAt("RaffleFactory", factoryAddress)
+
     console.log("Raffle Factory Address:", raffleFactory.address)
 
     if (process.env.CREATE_NEW_RAFFLE == "false") {
         const raffleId = await raffleFactory.raffleId()
+        console.log(raffleId.toString())
         const theAddress = await raffleFactory.raffles(raffleId - 1)
         console.log("address:", theAddress)
         console.log("end this")
         return
     }
     const raffleId = await raffleFactory.raffleId()
-    console.log(raffleId);
+    console.log(raffleId)
     await raffleFactory.createRaffle(ITEM_PRICE, INTERVAL)
     console.log("New Raffle Deployed!")
-    console.log(raffleId);
-    const theAddress = await raffleFactory.raffles(2) // change later
+    console.log(raffleId.toString())
+    const theAddress = await raffleFactory.raffles(raffleId) // change later
     console.log("address:", theAddress)
     raffleContract = await ethers.getContractAt("Raffle", theAddress)
     writeFile(filePath, theAddress)
@@ -59,7 +67,7 @@ async function createRaffle() {
         owner,
         entranceFee,
         ITEM_PRICE,
-        2, // change later
+        raffleId, // change later
         INTERVAL,
         "0x62844E4c8F53aFB38d80b454F49EE9462248734c",
     ]
